@@ -131,7 +131,7 @@ public class ChainedAnimator {
     
     func runAnimation(completion: @escaping (Bool) -> Void) {
         let value = animationValue
-        let animation = animation
+        let animation = self.animation
         syncOnMainIfPossible {
             UIView.animate(
                 withDuration: value.duration,
