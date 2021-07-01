@@ -14,13 +14,13 @@ import Ergo
 class ThenableSpec: QuickSpec {
     override func spec() {
         describe("thenable") {
-            it("should run on current queue") {
-                let currentQueue: DispatchQueue = .current ?? .main
+            it("should run on default global queue") {
+                let globalQueue: DispatchQueue = .global(qos: .background)
                 var promiseQueue: DispatchQueue? = nil
                 runPromise {
                     promiseQueue = .current
                 }
-                expect(promiseQueue).toEventually(equal(currentQueue))
+                expect(promiseQueue).toEventually(equal(globalQueue))
             }
             it("should run linearly") {
                 var counter = 0

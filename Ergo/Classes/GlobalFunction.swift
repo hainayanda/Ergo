@@ -28,11 +28,11 @@ public func syncOnMainIfPossible(execute work: @escaping () -> Void) {
 
 /// Perform task as a promise in given dispatcher
 /// - Parameters:
-///   - dispatcher: DispatchQueue where task run
+///   - dispatcher: DispatchQueue where task run, the default is global background
 ///   - work: Task to run
 /// - Returns: Promise of Result
 @discardableResult
-public func runPromise<Result>(on dispatcher: DispatchQueue? = nil, run work: @escaping () throws -> Result) -> Promise<Result> {
+public func runPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .background), run work: @escaping () throws -> Result) -> Promise<Result> {
     asyncPromise(on: dispatcher) { done in
         do {
             done(try work(), nil)
@@ -52,13 +52,11 @@ public func runPromiseOnMain<Result>(run work: @escaping () -> Result) -> Promis
 
 /// Perform async task as a promise in given dispatcher
 /// - Parameters:
-///   - dispatcher: DispatchQueue where task run
+///   - dispatcher: DispatchQueue where task run, the default is global background
 ///   - work: Promise task. Parameter is closure with Result and Error, call it once when the task is done, it will then trigger next Promise
 /// - Returns: Promise of Result
-public func asyncPromise<Result>(on dispatcher: DispatchQueue? = nil, run work: @escaping AsyncPromiseWorker<Result>) -> Promise<Result> {
-    let currentQueue: DispatchQueue = .current ?? .main
-    let queue = dispatcher ?? currentQueue
-    let promise: ClosurePromise<Result> = .init(currentQueue: queue, worker: work)
+public func asyncPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .background), run work: @escaping AsyncPromiseWorker<Result>) -> Promise<Result> {
+    let promise: ClosurePromise<Result> = .init(currentQueue: dispatcher, worker: work)
     return promise
 }
 
