@@ -25,9 +25,11 @@ open class ClosurePromise<Result>: Promise<Result> {
         syncIfPossible(on: self.currentQueue) {
             worker { result, error in
                 guard let result: Result = result else {
-                    promise.error = error ?? ErgoError(
-                        errorDescription: "Ergo Error: Invalid result",
-                        failureReason: "result is nil"
+                    promise.drop(
+                        becauseOf: error ?? ErgoError(
+                            errorDescription: "Ergo Error: Invalid result",
+                            failureReason: "result is nil"
+                        )
                     )
                     return
                 }

@@ -24,7 +24,7 @@ open class Promise<Result>: Thenable {
     }
     private var _error: Error?
     /// error catched
-    open var error: Error? {
+    open internal(set) var error: Error? {
         get {
             locked { _error }
         }
@@ -39,7 +39,7 @@ open class Promise<Result>: Thenable {
     var lock: NSLock = NSLock()
     private var workers: [(Result) -> Void] = []
     private var handlers: [(Error) -> Void] = []
-    private var child: [ErrorCatcher] = []
+    private var child: [Dropable] = []
     
     /// Default initializer
     /// - Parameter currentQueue: current DispatchQueue
@@ -64,7 +64,7 @@ open class Promise<Result>: Thenable {
                         let result = try execute(input)
                         promise.result = result
                     } catch {
-                        promise.error = error
+                        promise.drop(becauseOf: error)
                     }
                 }
             }
@@ -93,6 +93,12 @@ open class Promise<Result>: Thenable {
         }
     }
     
+    /// Drop task and emit error
+    /// - Parameter error: error emitted
+    public func drop(becauseOf error: Error) {
+        self.error = error
+    }
+    
     func registerWorker(_ worker: @escaping (Result) -> Void) {
         guard let result: Result = self.result else {
             locked {
@@ -103,14 +109,14 @@ open class Promise<Result>: Thenable {
         worker(result)
     }
     
-    func registerChild(_ promise: ErrorCatcher) {
+    func registerChild(_ promise: Dropable) {
         guard let error: Error = self.error else {
             locked {
                 child.append(promise)
             }
             return
         }
-        promise.error = error
+        promise.drop(becauseOf: error)
     }
     
     func registerHandler(_ handler: @escaping (Error) -> Void) {
@@ -136,7 +142,7 @@ open class Promise<Result>: Thenable {
     
     func notifyChild(with error: Error) {
         dequeueChild().forEach { child in
-            child.error = error
+            child.drop(becauseOf: error)
         }
     }
     
@@ -154,7 +160,7 @@ open class Promise<Result>: Thenable {
         }
     }
     
-    func dequeueChild() -> [ErrorCatcher] {
+    func dequeueChild() -> [Dropable] {
         locked {
             let child = self.child
             self.child = []

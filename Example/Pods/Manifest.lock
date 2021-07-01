@@ -1,5 +1,5 @@
 PODS:
-  - Ergo (1.0.0)
+  - Ergo (1.0.1)
   - Nimble (9.2.0)
   - Quick (4.0.0)
 
@@ -18,7 +18,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  Ergo: 2779456431b3558074d890c78a04150fd61f8ea6
+  Ergo: 1af4958deb41adbd4b644d117239a80e9265166f
   Nimble: 4f4a345c80b503b3ea13606a4f98405974ee4d0b
   Quick: 6473349e43b9271a8d43839d9ba1c442ed1b7ac4
 

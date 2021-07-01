@@ -87,7 +87,7 @@ public func waitPromises<Result1, Result2>(
             if let result1 = result, let result2 = retainedResult2 {
                 promise.result = (result1, result2)
             } else if let errorHappens = error ?? retainedError {
-                promise.error = errorHappens
+                promise.drop(becauseOf: errorHappens)
             }
         }
         task2.finally { result, error in
@@ -96,7 +96,7 @@ public func waitPromises<Result1, Result2>(
             if let result2 = result, let result1 = retainedResult1 {
                 promise.result = (result1, result2)
             } else if let errorHappens = error ?? retainedError {
-                promise.error = errorHappens
+                promise.drop(becauseOf: errorHappens)
             }
         }
     }
@@ -126,7 +126,7 @@ public func waitPromises<Result1, Result2, Result3>(
             if let result1 = result, let result2 = retainedResult2, let result3 = retainedResult3 {
                 promise.result = (result1, result2, result3)
             } else if let errorHappens = error ?? retainedError {
-                promise.error = errorHappens
+                promise.drop(becauseOf: errorHappens)
             }
         }
         task2.finally { result, error in
@@ -135,7 +135,7 @@ public func waitPromises<Result1, Result2, Result3>(
             if let result2 = result, let result1 = retainedResult1, let result3 = retainedResult3 {
                 promise.result = (result1, result2, result3)
             } else if let errorHappens = error ?? retainedError {
-                promise.error = errorHappens
+                promise.drop(becauseOf: errorHappens)
             }
         }
         task3.finally { result, error in
@@ -144,7 +144,7 @@ public func waitPromises<Result1, Result2, Result3>(
             if let result3 = result, let result1 = retainedResult1, let result2 = retainedResult2 {
                 promise.result = (result1, result2, result3)
             } else if let errorHappens = error ?? retainedError {
-                promise.error = errorHappens
+                promise.drop(becauseOf: errorHappens)
             }
         }
     }

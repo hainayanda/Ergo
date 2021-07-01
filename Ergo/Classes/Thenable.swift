@@ -10,20 +10,23 @@ import Foundation
 public typealias VoidPromise = Promise<Void>
 
 /// class that can catch an Error
-public protocol ErrorCatcher: class {
+public protocol Dropable: class {
     /// error catched
-    var error: Error? { get set }
+    var error: Error? { get }
+    /// True if error is occurs on previous task
+    var isError: Bool { get }
+    /// Drop with error
+    /// - Parameter error: error
+    func drop(becauseOf error: Error)
 }
 
 /// protocol to perform thenable task
-public protocol Thenable: ErrorCatcher {
+public protocol Thenable: Dropable {
     associatedtype Result
     /// Result of previous task
     var result: Result? { get }
     /// True if previous task already completed
     var isCompleted: Bool { get }
-    /// True if error is occurs on previous task
-    var isError: Bool { get }
     /// DispatchQueue from previous task
     var currentQueue: DispatchQueue { get }
     /// Perform task that will executed after previous task
@@ -42,6 +45,23 @@ public protocol Thenable: ErrorCatcher {
     func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise
 }
 
+public extension Dropable {
+    /// True if error is occurs on previous task
+    var isError: Bool {
+        return error != nil
+    }
+    
+    /// drop and emit default error
+    func drop() {
+        drop(
+            becauseOf: ErgoError(
+                errorDescription: "Ergo Error: dropping task",
+                failureReason: "Manual drop call"
+            )
+        )
+    }
+}
+
 public extension Thenable {
     /// True if previous task already completed
     var isCompleted: Bool {
@@ -51,11 +71,6 @@ public extension Thenable {
             return true
         }
         return false
-    }
-    
-    /// True if error is occurs on previous task
-    var isError: Bool {
-        return error != nil
     }
     
     /// Perform task that will executed after previous task
