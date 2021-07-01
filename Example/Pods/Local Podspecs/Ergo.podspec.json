@@ -1,8 +1,8 @@
 {
   "name": "Ergo",
   "version": "1.0.0",
-  "summary": "A short description of Ergo.",
-  "description": "TODO: Add long description of the pod here.",
+  "summary": "Ergo is a framework for concurrent programming based on promise pipelining",
+  "description": "Ergo is a framework for concurrent programming based on promise pipelining. It could help to avoid callback hell in complex asynchronous task",
   "homepage": "https://github.com/nayanda1/Ergo",
   "license": {
     "type": "MIT",
