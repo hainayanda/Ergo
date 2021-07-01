@@ -1,0 +1,27 @@
+PODS:
+  - Ergo (1.0.0)
+  - Nimble (9.2.0)
+  - Quick (4.0.0)
+
+DEPENDENCIES:
+  - Ergo (from `../`)
+  - Nimble (~> 9.2.0)
+  - Quick (~> 4.0.0)
+
+SPEC REPOS:
+  trunk:
+    - Nimble
+    - Quick
+
+EXTERNAL SOURCES:
+  Ergo:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Ergo: e52e0a769d68f4790187f2739b9bb8d5e541ef59
+  Nimble: 4f4a345c80b503b3ea13606a4f98405974ee4d0b
+  Quick: 6473349e43b9271a8d43839d9ba1c442ed1b7ac4
+
+PODFILE CHECKSUM: 3f53d5f89259928bbe5cd0c5043a97eb5d45963b
+
+COCOAPODS: 1.10.1

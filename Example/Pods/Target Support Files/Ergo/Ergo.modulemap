@@ -1,0 +1,6 @@
+framework module Ergo {
+  umbrella header "Ergo-umbrella.h"
+
+  export *
+  module * { export * }
+}
