@@ -23,7 +23,7 @@ public extension UIView {
         delay: TimeInterval = .zero,
         usingSpringWithDamping dampingRatio: CGFloat = 1,
         initialSpringVelocity velocity: CGFloat = 1,
-        options: UIViewAnimationOptions = .curveLinear) -> ChainAnimator {
+        options: UIView.AnimationOptions = .curveLinear) -> ChainAnimator {
         ChainAnimator(
             animationValue: .init(
                 duration: duration,
@@ -41,7 +41,7 @@ struct AnimationValue {
     let delay: TimeInterval
     let dampingRatio: CGFloat
     let velocity: CGFloat
-    let options: UIViewAnimationOptions
+    let options: UIView.AnimationOptions
 }
 
 public class ChainAnimator {
@@ -90,7 +90,7 @@ public class ChainedAnimator {
         delay: TimeInterval = .zero,
         usingSpringWithDamping dampingRatio: CGFloat = 1,
         initialSpringVelocity velocity: CGFloat = 1,
-        options: UIViewAnimationOptions = .curveLinear) -> ChainAnimator {
+        options: UIView.AnimationOptions = .curveLinear) -> ChainAnimator {
         ChainAnimator(
             previousAnimator: self,
             animationValue: .init(
