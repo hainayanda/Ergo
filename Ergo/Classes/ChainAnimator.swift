@@ -44,7 +44,7 @@ struct AnimationValue {
     let options: UIView.AnimationOptions
 }
 
-public class ChainAnimator {
+public final class ChainAnimator {
     let previousAnimator: ChainedAnimator?
     let animationValue: AnimationValue
     
@@ -65,7 +65,7 @@ public class ChainAnimator {
     }
 }
 
-public class ChainedAnimator {
+public final class ChainedAnimator {
     
     let previousAnimator: ChainedAnimator?
     let animationValue: AnimationValue
