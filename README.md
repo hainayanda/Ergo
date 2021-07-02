@@ -17,7 +17,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 ## Requirements
 
 - Swift 5.0 or higher (or 5.3 when using Swift Package Manager)
-- iOS 9.3 or higher (or 10 when using Swift Package Manager)
+- iOS 10 or higher
 
 ### Only Swift Package Manager
 
@@ -31,14 +31,14 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 Ergo is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'Ergo', '~> 1.0.1'
+pod 'Ergo', '~> 1.0.2'
 ```
 
 ### Swift Package Manager from XCode
 
 - Add it using XCode menu **File > Swift Package > Add Package Dependency**
 - Add **https://github.com/nayanda1/Ergo.git** as Swift Package URL
-- Set rules at **version**, with **Up to Next Major** option and put **1.0.1** as its version
+- Set rules at **version**, with **Up to Next Major** option and put **1.0.2** as its version
 - Click next and wait
 
 ### Swift Package Manager from Package.swift
@@ -47,7 +47,7 @@ Add as your target dependency in **Package.swift**
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/nayanda1/Ergo.git", .upToNextMajor(from: "1.0.1"))
+  .package(url: "https://github.com/nayanda1/Ergo.git", .upToNextMajor(from: "1.0.2"))
 ]
 ```
 
