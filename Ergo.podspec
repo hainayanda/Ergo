@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Ergo'
-  s.version          = '1.0.2'
+  s.version          = '1.0.3'
   s.summary          = 'Ergo is a framework for concurrent programming based on promise pipelining'
 
 # This description is used to generate tags and improve search results.
@@ -21,11 +21,11 @@ Pod::Spec.new do |s|
   Ergo is a framework for concurrent programming based on promise pipelining. It could help to avoid callback hell in complex asynchronous task
                        DESC
 
-  s.homepage         = 'https://github.com/nayanda1/Ergo'
+  s.homepage         = 'https://github.com/hainayanda/Ergo'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'nayanda' => 'nayanda1@outlook.com' }
-  s.source           = { :git => 'https://github.com/nayanda1/Ergo.git', :tag => s.version.to_s }
+  s.author           = { 'nayanda' => 'hainayanda@outlook.com' }
+  s.source           = { :git => 'https://github.com/hainayanda/Ergo.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '10.0'

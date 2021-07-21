@@ -2,9 +2,9 @@
 
 Ergo is a framework for concurrent programming based on promise pipelining. It could help to avoid callback hell in complex asynchronous task
 
-[![codebeat badge](https://codebeat.co/badges/b3e8f99e-dc71-47cd-b35a-a1293375d598)](https://codebeat.co/projects/github-com-nayanda1-ergo-main)
-![build](https://github.com/nayanda1/Ergo/workflows/build/badge.svg)
-![test](https://github.com/nayanda1/Ergo/workflows/test/badge.svg)
+[![codebeat badge](https://codebeat.co/badges/b3e8f99e-dc71-47cd-b35a-a1293375d598)](https://codebeat.co/projects/github-com-hainayanda-ergo-main)
+![build](https://github.com/hainayanda/Ergo/workflows/build/badge.svg)
+![test](https://github.com/hainayanda/Ergo/workflows/test/badge.svg)
 [![SwiftPM Compatible](https://img.shields.io/badge/SwiftPM-Compatible-brightgreen)](https://swift.org/package-manager/)
 [![Version](https://img.shields.io/cocoapods/v/Ergo.svg?style=flat)](https://cocoapods.org/pods/Ergo)
 [![License](https://img.shields.io/cocoapods/l/Ergo.svg?style=flat)](https://cocoapods.org/pods/Ergo)
@@ -31,14 +31,14 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 Ergo is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'Ergo', '~> 1.0.2'
+pod 'Ergo', '~> 1.0.3'
 ```
 
 ### Swift Package Manager from XCode
 
 - Add it using XCode menu **File > Swift Package > Add Package Dependency**
-- Add **https://github.com/nayanda1/Ergo.git** as Swift Package URL
-- Set rules at **version**, with **Up to Next Major** option and put **1.0.2** as its version
+- Add **https://github.com/hainayanda/Ergo.git** as Swift Package URL
+- Set rules at **version**, with **Up to Next Major** option and put **1.0.3** as its version
 - Click next and wait
 
 ### Swift Package Manager from Package.swift
@@ -47,7 +47,7 @@ Add as your target dependency in **Package.swift**
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/nayanda1/Ergo.git", .upToNextMajor(from: "1.0.2"))
+  .package(url: "https://github.com/hainayanda/Ergo.git", .upToNextMajor(from: "1.0.3"))
 ]
 ```
 
@@ -62,7 +62,7 @@ Use it in your target as `Ergo`
 
 ## Author
 
-Nayanda Haberty, nayanda1@outlook.com
+Nayanda Haberty, hainayanda@outlook.com
 
 ## License
 
