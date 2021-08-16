@@ -115,7 +115,27 @@ runPromise {
 }
 ```
 
-In the example above, the return value from the first `Promise` will be passed to the second `Promise`, and so on.
+### Multiple Thenable
+
+`Promise` can be handled by multiple `Thenable`. All you need to do is just call as much `Thenable` as you need after the particular `Promise`:
+
+```swift
+let myPromise = runPromise {
+  return Bool.random()
+}
+
+myPromise.then { result in
+  guard result else { return }
+  print("this run when true")
+}
+
+myPromise.then { result in
+  guard !result else { return }
+  print("this run when false")
+}
+
+```
+
 
 ### Handling Error
 
