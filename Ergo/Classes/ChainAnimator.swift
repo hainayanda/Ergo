@@ -110,7 +110,7 @@ public final class ChainedAnimator {
         let promise: Promise<Bool> = .init(currentQueue: .main)
         defer {
             runAnimationAfterPrevious { succeed in
-                promise.result = succeed
+                promise.currentValue = succeed
             }
         }
         return promise

@@ -34,10 +34,11 @@ open class NestedPromise<Result>: Promise<Result> {
             nested.drop(becauseOf: error)
             return
         }
+        let promise = self
         nested.then { result in
-            self.result = result
+            promise.currentValue = result
         }.handle { error in
-            self.error = error
+            promise.error = error
         }
     }
 }

@@ -10,14 +10,14 @@ import Foundation
 /// Regular Promise
 open class Promise<Result>: Thenable {
     
-    private var _result: Result?
+    private var _currentValue: Result?
     /// Result of previous task
-    open internal(set) var result: Result? {
+    open internal(set) var currentValue: Result? {
         get {
-            locked { _result }
+            locked { _currentValue }
         }
         set {
-            locked { _result = newValue }
+            locked { _currentValue = newValue }
             guard let value: Result = newValue else { return }
             notifyWorker(with: value)
         }
@@ -34,9 +34,22 @@ open class Promise<Result>: Thenable {
             notifyError(value)
         }
     }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// get result asynchronously
+    public var result: Result {
+        get async throws {
+            let promise = self
+            return try await withCheckedThrowingContinuation { continuation in
+                promise.register(continuation: continuation)
+            }
+        }
+    }
+    
     /// DispatchQueue from previous task
-    public let currentQueue: DispatchQueue
+    public let promiseQueue: DispatchQueue
     var lock: NSLock = NSLock()
+    private var abstractContinuations: [Any] = []
     private var workers: [(Result) -> Void] = []
     private var handlers: [(Error) -> Void] = []
     private var child: [Dropable] = []
@@ -45,15 +58,17 @@ open class Promise<Result>: Thenable {
     /// - Parameter currentQueue: current DispatchQueue
     public init(currentQueue: DispatchQueue? = nil) {
         let current: DispatchQueue = .current ?? .main
-        self.currentQueue = currentQueue ?? current
+        let queueUsed = currentQueue ?? current
+        self.promiseQueue = queueUsed
+        DispatchQueue.registerDetection(of: queueUsed)
     }
     
+    @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameters:
     ///   - dispatcher: Dispatcher where the task will executed
     ///   - execute: Task to execute
     /// - Returns: Promise of next result
-    @discardableResult
     open func then<NextResult>(on dispatcher: DispatchQueue, do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult> {
         let promise: Promise<NextResult> = .init(currentQueue: dispatcher)
         defer {
@@ -62,7 +77,7 @@ open class Promise<Result>: Thenable {
                 syncIfPossible(on: dispatcher) {
                     do {
                         let result = try execute(input)
-                        promise.result = result
+                        promise.currentValue = result
                     } catch {
                         promise.drop(becauseOf: error)
                     }
@@ -95,21 +110,23 @@ open class Promise<Result>: Thenable {
         return promise
     }
     
+    @discardableResult
     /// Handle error if occurs in previous task
     /// - Parameter handling: Error handler
     /// - Returns: current Promise
-    @discardableResult
     open func handle(_ handling: @escaping (Error) -> Void) -> Promise<Result> {
         registerHandler(handling)
         return self
     }
     
-    /// Perform task after all previous task is finished
-    /// - Parameter execute: Task to execute
-    /// - Returns: Promise with no result
     @discardableResult
-    open func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
-        then { result in
+    /// Perform task after all previous task is finished
+    /// - Parameters:
+    ///   - dispatcher: Dispatcher where the task will executed
+    /// - Parameter execute: Task to execute
+    /// - Returns: New void promise
+    public func finally(on dispatcher: DispatchQueue, do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+        then(on: dispatcher) { result in
             execute(result, nil)
         }.handle { error in
             execute(nil, error)
@@ -122,8 +139,52 @@ open class Promise<Result>: Thenable {
         self.error = error
     }
     
+    func getResultAfterGroupWait(_ timeoutResult: DispatchTimeoutResult, _ timeout: TimeInterval) throws -> Result {
+        if let result = currentValue {
+            return result
+        } else if let error = error {
+            throw error
+        }
+        switch timeoutResult {
+        case .success:
+            throw ErgoError(
+                errorDescription: "Ergo Error: Invalid result",
+                failureReason: "Waiting but still get no result or error"
+            )
+        case .timedOut:
+            throw ErgoError(
+                errorDescription: "Ergo Error: Timeout",
+                failureReason: "waiting for \(timeout) second but still get no result or error"
+            )
+        }
+    }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    func register(continuation: CheckedContinuation<Result, Error>) {
+        if let result = currentValue {
+            continuation.resume(returning: result)
+            return
+        } else if let error = error {
+            continuation.resume(throwing: error)
+            return
+        }
+        locked {
+            abstractContinuations.append(continuation)
+        }
+    }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    func notifyContinuation(with result: Swift.Result<Result, Error>) {
+        var dequeued: [CheckedContinuation<Result, Error>] = []
+        locked {
+            dequeued = abstractContinuations.compactMap { $0 as? CheckedContinuation<Result, Error> }
+            abstractContinuations = []
+        }
+        dequeued.forEach { $0.resume(with: result) }
+    }
+    
     func registerWorker(_ worker: @escaping (Result) -> Void) {
-        guard let result: Result = self.result else {
+        guard let result: Result = self.currentValue else {
             locked {
                 workers.append(worker)
             }
@@ -155,11 +216,17 @@ open class Promise<Result>: Thenable {
     func notifyError(_ error: Error) {
         notifyHandlers(with: error)
         notifyChild(with: error)
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+            notifyContinuation(with: .failure(error))
+        }
     }
     
     func notifyWorker(with result: Result) {
         dequeueWorkers().forEach { worker in
             worker(result)
+        }
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+            notifyContinuation(with: .success(result))
         }
     }
     
