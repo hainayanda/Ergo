@@ -30,9 +30,6 @@ public protocol Thenable: Dropable {
     /// DispatchQueue from previous task
     var promiseQueue: DispatchQueue { get }
     
-    /// timout for when get result via asyncResult
-    var asyncTimeout: TimeInterval { get set }
-    
     @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
     /// get result asynchronously
     var result: Result { get async throws }

@@ -35,9 +35,6 @@ open class Promise<Result>: Thenable {
         }
     }
     
-    /// timout for when get result via asyncResult
-    public var asyncTimeout: TimeInterval = 30
-    
     @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
     /// get result asynchronously
     public var result: Result {
