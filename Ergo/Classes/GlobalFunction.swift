@@ -84,7 +84,7 @@ public func asyncAwaitPromise<Result>(asyncWork: @Sendable @escaping () async th
 public func waitPromises<Result1, Result2>(
     from task1: Promise<Result1>,
     _ task2: Promise<Result2>) -> Promise<(Result1, Result2)> {
-        guard #unavailable(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0) else {
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
             return asyncAwaitPromise {
                 let result1 = try await task1.result
                 let result2 = try await task2.result
@@ -129,7 +129,7 @@ public func waitPromises<Result1, Result2, Result3>(
     from task1: Promise<Result1>,
     _ task2: Promise<Result2>,
     _ task3: Promise<Result3>) -> Promise<(Result1, Result2, Result3)> {
-        guard #unavailable(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0) else {
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
             return asyncAwaitPromise {
                 let result1 = try await task1.result
                 let result2 = try await task2.result

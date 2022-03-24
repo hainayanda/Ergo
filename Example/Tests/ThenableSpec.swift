@@ -116,6 +116,7 @@ class ThenableSpec: QuickSpec {
                             }
                         }
                     }
+                    expect(thenable.isCompleted).to(beTrue())
                     expect(thenable.currentValue).to(beTrue())
                     expect(thenable.error).to(beNil())
                 }
@@ -133,6 +134,7 @@ class ThenableSpec: QuickSpec {
                             }
                         }
                     }
+                    expect(thenable.isCompleted).to(beTrue())
                     expect(thenable.currentValue).to(beNil())
                     expect(thenable.error).toNot(beNil())
                 }
