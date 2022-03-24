@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Ergo'
-  s.version          = '1.0.3'
+  s.version          = '1.1.0'
   s.summary          = 'Ergo is a framework for concurrent programming based on promise pipelining'
 
 # This description is used to generate tags and improve search results.
