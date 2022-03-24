@@ -29,19 +29,32 @@ public protocol Thenable: Dropable {
     var isCompleted: Bool { get }
     /// DispatchQueue from previous task
     var currentQueue: DispatchQueue { get }
+    
+    @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameters:
     ///   - dispatcher: Dispatcher where the task will executed
     ///   - execute: Task to execute
-    @discardableResult
+    /// - Returns: New promise
     func then<NextResult>(on dispatcher: DispatchQueue, do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult>
+    
+    /// Perform task that will executed after previous task and return a promise
+    /// - Parameters:
+    ///   - createNewPromise: Task that will execute and producing new promise
+    ///   - dispatcher: Dispatcher where the task will executed
+    /// - Returns: new promise
+    func thenContinue<NextResult>(on dispatcher: DispatchQueue, with createNewPromise: @escaping (Result) throws -> Promise<NextResult>) -> Promise<NextResult>
+    
+    @discardableResult
     /// Handle error if occurs in previous task
     /// - Parameter handling: Error handler
-    @discardableResult
+    /// - Returns: New promise
     func handle(_ handling: @escaping (Error) -> Void) -> Promise<Result>
+    
+    @discardableResult
     /// Perform task after all previous task is finished
     /// - Parameter execute: Task to execute
-    @discardableResult
+    /// - Returns: New void promise
     func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise
 }
 
@@ -73,42 +86,43 @@ public extension Thenable {
         return false
     }
     
+    @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameter execute: Task to execute
     /// - Returns: Promise of next result
-    @discardableResult
     func then<NextResult>(do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult> {
         then(on: currentQueue, do: execute)
     }
 }
 
 public extension Thenable where Result == Void {
+    
+    @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameters:
     ///   - dispatcher: Dispatcher where the task will executed
     ///   - execute: Task to execute
     /// - Returns: Promise of next result
-    @discardableResult
     func then<NextResult>(on dispatcher: DispatchQueue, do execute: @escaping () throws -> NextResult) -> Promise<NextResult> {
         then(on: dispatcher) { _ throws -> NextResult in
             try execute()
         }
     }
     
+    @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameter execute: Task to execute
     /// - Returns: Promise of next result
-    @discardableResult
     func then<NextResult>(do execute: @escaping () throws -> NextResult) -> Promise<NextResult> {
         then { _ throws -> NextResult in
             try execute()
         }
     }
     
+    @discardableResult
     /// Perform task after all previous task is finished
     /// - Parameter execute: Task to execute
     /// - Returns: Promise with no result
-    @discardableResult
     func finally(do execute: @escaping (Error?) -> Void) -> VoidPromise {
         finally { _, error in
             execute(error)

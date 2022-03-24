@@ -3,5 +3,5 @@ target 'Ergo_Tests' do
   pod 'Ergo', :path => '../'
   
   pod 'Quick', '~> 4.0.0'
-    pod 'Nimble', '~> 9.2.0'
+    pod 'Nimble', '~> 9.2.1'
 end

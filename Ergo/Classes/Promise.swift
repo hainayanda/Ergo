@@ -72,6 +72,29 @@ open class Promise<Result>: Thenable {
         return promise
     }
     
+    /// Perform task that will executed after previous task and return a promise
+    /// - Parameters:
+    ///   - createNewPromise: Task that will execute and producing new promise
+    ///   - dispatcher: Dispatcher where the task will executed
+    /// - Returns: new promise
+    public func thenContinue<NextResult>(on dispatcher: DispatchQueue, with createNewPromise: @escaping (Result) throws -> Promise<NextResult>) -> Promise<NextResult> {
+        let promise: NestedPromise<NextResult> = .init(currentQueue: dispatcher)
+        defer {
+            registerChild(promise)
+            registerWorker { input in
+                syncIfPossible(on: dispatcher) {
+                    do {
+                        let newPromise = try createNewPromise(input)
+                        promise.nested = newPromise
+                    } catch {
+                        promise.drop(becauseOf: error)
+                    }
+                }
+            }
+        }
+        return promise
+    }
+    
     /// Handle error if occurs in previous task
     /// - Parameter handling: Error handler
     /// - Returns: current Promise
