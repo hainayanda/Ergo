@@ -67,6 +67,15 @@ public func asyncPromiseOnMain<Result>(run work: @escaping AsyncPromiseWorker<Re
     asyncPromise(on: .main, run: work)
 }
 
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+/// Perform async await from swift 5.5 task as a promise
+/// - Parameter asyncWork: Async task. Closure that contains awaitable call
+/// - Returns: Promise of Result
+public func asyncAwaitPromise<Result>(asyncWork: @Sendable @escaping () async throws -> Result) -> Promise<Result> {
+    let promise: ClosurePromise<Result> = .init(worker: asyncWork)
+    return promise
+}
+
 /// Create promise that wait 2 promise to finished and combine its results
 /// - Parameters:
 ///   - task1: First Promise

@@ -38,6 +38,21 @@ open class ClosurePromise<Result>: Promise<Result> {
         }
     }
     
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    public init(worker: @Sendable @escaping () async throws -> Result) {
+        super.init(currentQueue: nil)
+        // promise retained by design
+        let promise = self
+        Task {
+            do {
+                let result = try await worker()
+                promise.currentValue = result
+            } catch {
+                promise.drop(becauseOf: error)
+            }
+        }
+    }
+    
     @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameters:
@@ -46,6 +61,15 @@ open class ClosurePromise<Result>: Promise<Result> {
     /// - Returns: Promise of next result
     open override func then<NextResult>(on dispatcher: DispatchQueue, do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult> {
         super.then(on: dispatcher, do: execute)
+    }
+    
+    /// Perform task that will executed after previous task and return a promise
+    /// - Parameters:
+    ///   - createNewPromise: Task that will execute and producing new promise
+    ///   - dispatcher: Dispatcher where the task will executed
+    /// - Returns: new promise
+    open override func thenContinue<NextResult>(on dispatcher: DispatchQueue, with createNewPromise: @escaping (Result) throws -> Promise<NextResult>) -> Promise<NextResult> {
+        super.thenContinue(on: dispatcher, with: createNewPromise)
     }
     
     @discardableResult

@@ -30,6 +30,13 @@ public protocol Thenable: Dropable {
     /// DispatchQueue from previous task
     var promiseQueue: DispatchQueue { get }
     
+    /// timout for when get result via asyncResult
+    var asyncTimeout: TimeInterval { get set }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// get result asynchronously
+    var result: Result { get async throws }
+    
     @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameters:
@@ -44,6 +51,13 @@ public protocol Thenable: Dropable {
     ///   - dispatcher: Dispatcher where the task will executed
     /// - Returns: new promise
     func thenContinue<NextResult>(on dispatcher: DispatchQueue, with createNewPromise: @escaping (Result) throws -> Promise<NextResult>) -> Promise<NextResult>
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// Perform task that will executed after previous task and return a promise
+    /// - Parameters:
+    ///   - asyncTask: async task
+    /// - Returns: new promise
+    func thenAsyncAwait<NextResult>(_ asyncTask: @Sendable @escaping (Result) async throws -> NextResult) -> Promise<NextResult>
     
     @discardableResult
     /// Handle error if occurs in previous task
@@ -95,6 +109,35 @@ public extension Thenable {
     func then<NextResult>(do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult> {
         then(on: promiseQueue, do: execute)
     }
+    
+    @discardableResult
+    /// Perform task that will executed after previous task
+    /// - Parameter execute: Task to execute
+    /// - Returns: Promise of next result
+    func thenContinue<NextResult>(with createNewPromise: @escaping (Result) throws -> Promise<NextResult>) -> Promise<NextResult> {
+        thenContinue(on: promiseQueue, with: createNewPromise)
+    }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// Perform task that will executed after previous task and return a promise
+    /// - Parameters:
+    ///   - asyncTask: async task
+    /// - Returns: new promise
+    func thenAsyncAwait<NextResult>(_ asyncTask: @Sendable @escaping (Result) async throws -> NextResult) -> Promise<NextResult> {
+        thenContinue { result in
+            return ClosurePromise {
+                try await asyncTask(result)
+            }
+        }
+    }
+    
+    @discardableResult
+    /// Perform task after all previous task is finished
+    /// - Parameter execute: Task to execute
+    /// - Returns: New void promise
+    func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+        finally(on: promiseQueue, do: execute)
+    }
 }
 
 public extension Thenable where Result == Void {
@@ -128,6 +171,26 @@ public extension Thenable where Result == Void {
     func finally(do execute: @escaping (Error?) -> Void) -> VoidPromise {
         finally { _, error in
             execute(error)
+        }
+    }
+}
+
+@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+extension Task where Failure == Never {
+    func toPromise() -> Promise<Success> {
+        let task = self
+        return asyncPromise { done in
+            Task {
+                let result = await task.result
+                switch result {
+                case .success(let value):
+                    done(value, nil)
+                    return value
+                case .failure(let error):
+                    done(nil, error)
+                    return error as! Success
+                }
+            }
         }
     }
 }

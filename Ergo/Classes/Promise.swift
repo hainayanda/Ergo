@@ -34,9 +34,25 @@ open class Promise<Result>: Thenable {
             notifyError(value)
         }
     }
+    
+    /// timout for when get result via asyncResult
+    public var asyncTimeout: TimeInterval = 30
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// get result asynchronously
+    public var result: Result {
+        get async throws {
+            let promise = self
+            return try await withCheckedThrowingContinuation { continuation in
+                promise.register(continuation: continuation)
+            }
+        }
+    }
+    
     /// DispatchQueue from previous task
     public let promiseQueue: DispatchQueue
     var lock: NSLock = NSLock()
+    private var abstractContinuations: [Any] = []
     private var workers: [(Result) -> Void] = []
     private var handlers: [(Error) -> Void] = []
     private var child: [Dropable] = []
@@ -126,6 +142,50 @@ open class Promise<Result>: Thenable {
         self.error = error
     }
     
+    func getResultAfterGroupWait(_ timeoutResult: DispatchTimeoutResult, _ timeout: TimeInterval) throws -> Result {
+        if let result = currentValue {
+            return result
+        } else if let error = error {
+            throw error
+        }
+        switch timeoutResult {
+        case .success:
+            throw ErgoError(
+                errorDescription: "Ergo Error: Invalid result",
+                failureReason: "Waiting but still get no result or error"
+            )
+        case .timedOut:
+            throw ErgoError(
+                errorDescription: "Ergo Error: Timeout",
+                failureReason: "waiting for \(timeout) second but still get no result or error"
+            )
+        }
+    }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    func register(continuation: CheckedContinuation<Result, Error>) {
+        if let result = currentValue {
+            continuation.resume(returning: result)
+            return
+        } else if let error = error {
+            continuation.resume(throwing: error)
+            return
+        }
+        locked {
+            abstractContinuations.append(continuation)
+        }
+    }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    func notifyContinuation(with result: Swift.Result<Result, Error>) {
+        var dequeued: [CheckedContinuation<Result, Error>] = []
+        locked {
+            dequeued = abstractContinuations.compactMap { $0 as? CheckedContinuation<Result, Error> }
+            abstractContinuations = []
+        }
+        dequeued.forEach { $0.resume(with: result) }
+    }
+    
     func registerWorker(_ worker: @escaping (Result) -> Void) {
         guard let result: Result = self.currentValue else {
             locked {
@@ -159,11 +219,17 @@ open class Promise<Result>: Thenable {
     func notifyError(_ error: Error) {
         notifyHandlers(with: error)
         notifyChild(with: error)
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+            notifyContinuation(with: .failure(error))
+        }
     }
     
     func notifyWorker(with result: Result) {
         dequeueWorkers().forEach { worker in
             worker(result)
+        }
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+            notifyContinuation(with: .success(result))
         }
     }
     
