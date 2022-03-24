@@ -170,24 +170,23 @@ public extension Thenable where Result == Void {
             execute(error)
         }
     }
-}
-
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-extension Task where Failure == Never {
-    func toPromise() -> Promise<Success> {
-        let task = self
-        return asyncPromise { done in
-            Task {
-                let result = await task.result
-                switch result {
-                case .success(let value):
-                    done(value, nil)
-                    return value
-                case .failure(let error):
-                    done(nil, error)
-                    return error as! Success
-                }
-            }
+    
+    @discardableResult
+    /// Perform task after all previous task is finished
+    /// - Parameters:
+    ///   - dispatcher: Dispatcher where the task will executed
+    /// - Parameter execute: Task to execute
+    /// - Returns: New void promise
+    func finally(on dispatcher: DispatchQueue, do execute: @escaping (Error?) -> Void) -> VoidPromise {
+        finally(on: dispatcher) { _, error in
+            execute(error)
         }
     }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// async method that will wait until promise is completed
+    func waitUntilCompleted() async throws {
+        try await result
+    }
+    
 }
