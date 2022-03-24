@@ -31,7 +31,7 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 Ergo is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'Ergo', '~> 1.0.3'
+pod 'Ergo', '~> 1.1.0'
 ```
 
 ### Swift Package Manager from XCode
@@ -218,6 +218,20 @@ let promise = runPromise {
 }
 
 promise.drop()
+```
+
+### Continue with other Promise
+
+You can continue then with new promise. Use `thenContinue` instead of `then`, then return a `Promise`:
+
+```swift
+runPromise {
+    // do something
+}.thenContinue {
+    return somethingThatReturnAPromise()
+}.then {
+    print("will executed after promise from somethingThatReturnAPromise() is finished"
+}
 ```
 
 ### Combining Promises
