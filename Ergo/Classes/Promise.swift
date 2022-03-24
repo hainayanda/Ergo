@@ -45,7 +45,9 @@ open class Promise<Result>: Thenable {
     /// - Parameter currentQueue: current DispatchQueue
     public init(currentQueue: DispatchQueue? = nil) {
         let current: DispatchQueue = .current ?? .main
-        self.currentQueue = currentQueue ?? current
+        let queueUsed = currentQueue ?? current
+        self.promiseQueue = queueUsed
+        DispatchQueue.registerDetection(of: queueUsed)
     }
     
     @discardableResult
