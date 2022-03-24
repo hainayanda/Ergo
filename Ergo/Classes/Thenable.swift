@@ -10,7 +10,7 @@ import Foundation
 public typealias VoidPromise = Promise<Void>
 
 /// class that can catch an Error
-public protocol Dropable: class {
+public protocol Dropable: AnyObject {
     /// error catched
     var error: Error? { get }
     /// True if error is occurs on previous task
@@ -24,11 +24,11 @@ public protocol Dropable: class {
 public protocol Thenable: Dropable {
     associatedtype Result
     /// Result of previous task
-    var result: Result? { get }
+    var currentValue: Result? { get }
     /// True if previous task already completed
     var isCompleted: Bool { get }
     /// DispatchQueue from previous task
-    var currentQueue: DispatchQueue { get }
+    var promiseQueue: DispatchQueue { get }
     
     @discardableResult
     /// Perform task that will executed after previous task
@@ -78,7 +78,7 @@ public extension Dropable {
 public extension Thenable {
     /// True if previous task already completed
     var isCompleted: Bool {
-        if let _: Result = result {
+        if let _: Result = currentValue {
             return true
         } else if error != nil {
             return true
@@ -91,7 +91,7 @@ public extension Thenable {
     /// - Parameter execute: Task to execute
     /// - Returns: Promise of next result
     func then<NextResult>(do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult> {
-        then(on: currentQueue, do: execute)
+        then(on: promiseQueue, do: execute)
     }
 }
 

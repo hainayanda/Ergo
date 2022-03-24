@@ -22,7 +22,7 @@ open class ClosurePromise<Result>: Promise<Result> {
         super.init(currentQueue: currentQueue)
         // promise retained by design
         let promise = self
-        syncIfPossible(on: self.currentQueue) {
+        syncIfPossible(on: self.promiseQueue) {
             worker { result, error in
                 guard let result: Result = result else {
                     promise.drop(
@@ -33,7 +33,7 @@ open class ClosurePromise<Result>: Promise<Result> {
                     )
                     return
                 }
-                promise.result = result
+                promise.currentValue = result
             }
         }
     }

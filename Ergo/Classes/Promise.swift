@@ -10,14 +10,14 @@ import Foundation
 /// Regular Promise
 open class Promise<Result>: Thenable {
     
-    private var _result: Result?
+    private var _currentValue: Result?
     /// Result of previous task
-    open internal(set) var result: Result? {
+    open internal(set) var currentValue: Result? {
         get {
-            locked { _result }
+            locked { _currentValue }
         }
         set {
-            locked { _result = newValue }
+            locked { _currentValue = newValue }
             guard let value: Result = newValue else { return }
             notifyWorker(with: value)
         }
@@ -35,7 +35,7 @@ open class Promise<Result>: Thenable {
         }
     }
     /// DispatchQueue from previous task
-    public let currentQueue: DispatchQueue
+    public let promiseQueue: DispatchQueue
     var lock: NSLock = NSLock()
     private var workers: [(Result) -> Void] = []
     private var handlers: [(Error) -> Void] = []
@@ -62,7 +62,7 @@ open class Promise<Result>: Thenable {
                 syncIfPossible(on: dispatcher) {
                     do {
                         let result = try execute(input)
-                        promise.result = result
+                        promise.currentValue = result
                     } catch {
                         promise.drop(becauseOf: error)
                     }
@@ -123,7 +123,7 @@ open class Promise<Result>: Thenable {
     }
     
     func registerWorker(_ worker: @escaping (Result) -> Void) {
-        guard let result: Result = self.result else {
+        guard let result: Result = self.currentValue else {
             locked {
                 workers.append(worker)
             }
