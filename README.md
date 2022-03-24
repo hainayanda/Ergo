@@ -38,7 +38,7 @@ pod 'Ergo', '~> 1.1.0'
 
 - Add it using XCode menu **File > Swift Package > Add Package Dependency**
 - Add **https://github.com/hainayanda/Ergo.git** as Swift Package URL
-- Set rules at **version**, with **Up to Next Major** option and put **1.0.3** as its version
+- Set rules at **version**, with **Up to Next Major** option and put **1.1.0** as its version
 - Click next and wait
 
 ### Swift Package Manager from Package.swift
@@ -47,7 +47,7 @@ Add as your target dependency in **Package.swift**
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/hainayanda/Ergo.git", .upToNextMajor(from: "1.0.3"))
+  .package(url: "https://github.com/hainayanda/Ergo.git", .upToNextMajor(from: "1.1.0"))
 ]
 ```
 
