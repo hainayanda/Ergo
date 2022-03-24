@@ -31,14 +31,14 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 Ergo is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'Ergo', '~> 1.1.0'
+pod 'Ergo', '~> 1.2.0'
 ```
 
 ### Swift Package Manager from XCode
 
 - Add it using XCode menu **File > Swift Package > Add Package Dependency**
 - Add **https://github.com/hainayanda/Ergo.git** as Swift Package URL
-- Set rules at **version**, with **Up to Next Major** option and put **1.1.0** as its version
+- Set rules at **version**, with **Up to Next Major** option and put **1.2.0** as its version
 - Click next and wait
 
 ### Swift Package Manager from Package.swift
@@ -47,7 +47,7 @@ Add as your target dependency in **Package.swift**
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/hainayanda/Ergo.git", .upToNextMajor(from: "1.1.0"))
+  .package(url: "https://github.com/hainayanda/Ergo.git", .upToNextMajor(from: "1.2.0"))
 ]
 ```
 
@@ -257,9 +257,9 @@ Since `waitPromises` actually just return back a `Promise` of `Tuple`, you can a
 ### Promise status
 
 You can always check the `Promise` status using its object. its have some properties you can check:
-- `result` which is the latest result from the task, will be nil if the task is not finished yet
+- `currentValue` which is the latest result from the task, will be nil if the task is not finished yet
 - `error` which is the latest error from the task, will be nil if the task did not emit an error yet
-- `currentQueue` which is the current DispatchQueue that run the task
+- `promiseQueue` which is the promise DispatchQueue that run the task
 - `isCompleted` will be true if the task is complete or emitting an error
 - `isError` will be true the task emitting error
 
@@ -272,6 +272,34 @@ let promise = runPromise {
 
 print(promise.isCompleted)
 ```
+
+### New Swift Async
+
+Swift introduce new functionality which is async. Ergo can be used with new async too. To create a Promise from async method, use global `asyncAwaitPromise`:
+
+```swift
+asyncAwaitPromise {
+  await myAsyncFunction()
+}.then { result in
+  print(result)
+}
+```
+
+In case you want to treat Promise as async, just use `result` property from Promise:
+
+```swift
+let asyncResult = try await myPromise.result
+```
+
+It will return the result after finished and throwing error if error is hapens.
+
+You can always convert task to Promise too:
+
+```swift
+let promiseFromTask = myTask.asPromise()
+```
+
+Keep in mind that all of async functionality just available on macOS 10.15, iOS 13.0, watchOS 6.0 and tvOS 13.0
 
 ### Creating Promise with asynchronous task
 
