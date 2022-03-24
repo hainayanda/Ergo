@@ -275,7 +275,7 @@ print(promise.isCompleted)
 
 ### New Swift Async
 
-Swift introduce new functionality which is async. Ergo can be used with new async too. To create a Promise from async method, use global `asyncAwaitPromise`:
+Swift introduce new functionality which is async. Ergo can be used with new async too. To create a `Promise` from async method, use global `asyncAwaitPromise`:
 
 ```swift
 asyncAwaitPromise {
@@ -285,7 +285,7 @@ asyncAwaitPromise {
 }
 ```
 
-In case you want to treat Promise as async, just use `result` property from Promise:
+In case you want to treat `Promise` as async, just use `result` property from `Promise`:
 
 ```swift
 let asyncResult = try await myPromise.result
@@ -293,10 +293,16 @@ let asyncResult = try await myPromise.result
 
 It will return the result after finished and throwing error if error is hapens.
 
-You can always convert task to Promise too:
+You can always convert `Task` to `Promise` too:
 
 ```swift
 let promiseFromTask = myTask.asPromise()
+```
+
+or `Promise` to `Task`:
+
+```swift
+let taskFromPromise = myPromise.asTask()
 ```
 
 Keep in mind that all of async functionality just available on macOS 10.15, iOS 13.0, watchOS 6.0 and tvOS 13.0
