@@ -26,12 +26,12 @@ public func syncOnMainIfPossible(execute work: @escaping () -> Void) {
     syncIfPossible(on: .main, execute: work)
 }
 
+@discardableResult
 /// Perform task as a promise in given dispatcher
 /// - Parameters:
 ///   - dispatcher: DispatchQueue where task run, the default is global background
 ///   - work: Task to run
 /// - Returns: Promise of Result
-@discardableResult
 public func runPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .background), run work: @escaping () throws -> Result) -> Promise<Result> {
     asyncPromise(on: dispatcher) { done in
         do {
@@ -42,10 +42,10 @@ public func runPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .back
     }
 }
 
+@discardableResult
 /// Perform Task as a promise in main dispatcher
 /// - Parameter work: Task to run
 /// - Returns: Promise of Result
-@discardableResult
 public func runPromiseOnMain<Result>(run work: @escaping () -> Result) -> Promise<Result> {
     runPromise(on: .main, run: work)
 }

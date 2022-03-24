@@ -48,12 +48,12 @@ open class Promise<Result>: Thenable {
         self.currentQueue = currentQueue ?? current
     }
     
+    @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameters:
     ///   - dispatcher: Dispatcher where the task will executed
     ///   - execute: Task to execute
     /// - Returns: Promise of next result
-    @discardableResult
     open func then<NextResult>(on dispatcher: DispatchQueue, do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult> {
         let promise: Promise<NextResult> = .init(currentQueue: dispatcher)
         defer {
@@ -95,21 +95,23 @@ open class Promise<Result>: Thenable {
         return promise
     }
     
+    @discardableResult
     /// Handle error if occurs in previous task
     /// - Parameter handling: Error handler
     /// - Returns: current Promise
-    @discardableResult
     open func handle(_ handling: @escaping (Error) -> Void) -> Promise<Result> {
         registerHandler(handling)
         return self
     }
     
-    /// Perform task after all previous task is finished
-    /// - Parameter execute: Task to execute
-    /// - Returns: Promise with no result
     @discardableResult
-    open func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
-        then { result in
+    /// Perform task after all previous task is finished
+    /// - Parameters:
+    ///   - dispatcher: Dispatcher where the task will executed
+    /// - Parameter execute: Task to execute
+    /// - Returns: New void promise
+    public func finally(on dispatcher: DispatchQueue, do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+        then(on: dispatcher) { result in
             execute(result, nil)
         }.handle { error in
             execute(nil, error)

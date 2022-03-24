@@ -38,30 +38,32 @@ open class ClosurePromise<Result>: Promise<Result> {
         }
     }
     
+    @discardableResult
     /// Perform task that will executed after previous task
     /// - Parameters:
     ///   - dispatcher: Dispatcher where the task will executed
     ///   - execute: Task to execute
     /// - Returns: Promise of next result
-    @discardableResult
     open override func then<NextResult>(on dispatcher: DispatchQueue, do execute: @escaping (Result) throws -> NextResult) -> Promise<NextResult> {
         super.then(on: dispatcher, do: execute)
     }
     
+    @discardableResult
     /// Handle error if occurs in previous task
     /// - Parameter handling: Error handler
     /// - Returns: current Promise
-    @discardableResult
     open override func handle(_ handling: @escaping (Error) -> Void) -> Promise<Result> {
         super.handle(handling)
     }
     
-    /// Perform task after all previous task is finished
-    /// - Parameter execute: Task to execute
-    /// - Returns: Promise with no result
     @discardableResult
-    open override func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
-        super.finally(do: execute)
+    /// Perform task after all previous task is finished
+    /// - Parameters:
+    ///   - dispatcher: Dispatcher where the task will executed
+    /// - Parameter execute: Task to execute
+    /// - Returns: New void promise
+    open override func finally(on dispatcher: DispatchQueue, do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+        super.finally(on: dispatcher, do: execute)
     }
     
     /// Drop task and emit error
