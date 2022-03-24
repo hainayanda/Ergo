@@ -107,7 +107,7 @@ public final class ChainedAnimator {
     /// - Returns: Promise of Bool, if the Promise result is true then all animation is succeed
     @discardableResult
     public func animate() -> Promise<Bool> {
-        let promise: Promise<Bool> = .init(promiseQueue: .main)
+        let promise: Promise<Bool> = .init(currentQueue: .main)
         defer {
             runAnimationAfterPrevious { succeed in
                 promise.currentValue = succeed
