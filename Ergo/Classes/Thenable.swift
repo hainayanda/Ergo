@@ -135,6 +135,16 @@ public extension Thenable {
     func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
         finally(on: promiseQueue, do: execute)
     }
+    
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// Convert Promise to Task
+    /// - Returns: Task
+    func asTask() -> Task<Result, Error> {
+        let promise = self
+        return Task<Result, Error> {
+            try await promise.result
+        }
+    }
 }
 
 public extension Thenable where Result == Void {
