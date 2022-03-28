@@ -84,33 +84,40 @@ public func asyncAwaitPromise<Result>(asyncWork: @Sendable @escaping () async th
 public func waitPromises<Result1, Result2>(
     from task1: Promise<Result1>,
     _ task2: Promise<Result2>) -> Promise<(Result1, Result2)> {
-    let currentQueue: DispatchQueue = .current ?? .main
-    let promise: Promise<(Result1, Result2)> = .init(currentQueue: currentQueue)
-    var retainedResult1: Result1?
-    var retainedResult2: Result2?
-    var retainedError: Error?
-    defer {
-        task1.finally { result, error in
-            retainedResult1 = result
-            retainedError = error
-            if let result1 = result, let result2 = retainedResult2 {
-                promise.currentValue = (result1, result2)
-            } else if let errorHappens = error ?? retainedError {
-                promise.drop(becauseOf: errorHappens)
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+            return asyncAwaitPromise {
+                let result1 = try await task1.result
+                let result2 = try await task2.result
+                return (result1, result2)
             }
         }
-        task2.finally { result, error in
-            retainedResult2 = result
-            retainedError = error
-            if let result2 = result, let result1 = retainedResult1 {
-                promise.currentValue = (result1, result2)
-            } else if let errorHappens = error ?? retainedError {
-                promise.drop(becauseOf: errorHappens)
+        let currentQueue: DispatchQueue = .current ?? .main
+        let promise: Promise<(Result1, Result2)> = .init(currentQueue: currentQueue)
+        var retainedResult1: Result1?
+        var retainedResult2: Result2?
+        var retainedError: Error?
+        defer {
+            task1.finally { result, error in
+                retainedResult1 = result
+                retainedError = error
+                if let result1 = result, let result2 = retainedResult2 {
+                    promise.currentValue = (result1, result2)
+                } else if let errorHappens = error ?? retainedError {
+                    promise.drop(becauseOf: errorHappens)
+                }
+            }
+            task2.finally { result, error in
+                retainedResult2 = result
+                retainedError = error
+                if let result2 = result, let result1 = retainedResult1 {
+                    promise.currentValue = (result1, result2)
+                } else if let errorHappens = error ?? retainedError {
+                    promise.drop(becauseOf: errorHappens)
+                }
             }
         }
+        return promise
     }
-    return promise
-}
 
 /// Create promise that wait 3 promise to finished and combine its results
 /// - Parameters:
@@ -122,40 +129,48 @@ public func waitPromises<Result1, Result2, Result3>(
     from task1: Promise<Result1>,
     _ task2: Promise<Result2>,
     _ task3: Promise<Result3>) -> Promise<(Result1, Result2, Result3)> {
-    let currentQueue: DispatchQueue = .current ?? .main
-    let promise: Promise<(Result1, Result2, Result3)> = .init(currentQueue: currentQueue)
-    var retainedResult1: Result1?
-    var retainedResult2: Result2?
-    var retainedResult3: Result3?
-    var retainedError: Error?
-    defer {
-        task1.finally { result, error in
-            retainedResult1 = result
-            retainedError = error
-            if let result1 = result, let result2 = retainedResult2, let result3 = retainedResult3 {
-                promise.currentValue = (result1, result2, result3)
-            } else if let errorHappens = error ?? retainedError {
-                promise.drop(becauseOf: errorHappens)
+        if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) {
+            return asyncAwaitPromise {
+                let result1 = try await task1.result
+                let result2 = try await task2.result
+                let result3 = try await task3.result
+                return (result1, result2, result3)
             }
         }
-        task2.finally { result, error in
-            retainedResult2 = result
-            retainedError = error
-            if let result2 = result, let result1 = retainedResult1, let result3 = retainedResult3 {
-                promise.currentValue = (result1, result2, result3)
-            } else if let errorHappens = error ?? retainedError {
-                promise.drop(becauseOf: errorHappens)
+        let currentQueue: DispatchQueue = .current ?? .main
+        let promise: Promise<(Result1, Result2, Result3)> = .init(currentQueue: currentQueue)
+        var retainedResult1: Result1?
+        var retainedResult2: Result2?
+        var retainedResult3: Result3?
+        var retainedError: Error?
+        defer {
+            task1.finally { result, error in
+                retainedResult1 = result
+                retainedError = error
+                if let result1 = result, let result2 = retainedResult2, let result3 = retainedResult3 {
+                    promise.currentValue = (result1, result2, result3)
+                } else if let errorHappens = error ?? retainedError {
+                    promise.drop(becauseOf: errorHappens)
+                }
+            }
+            task2.finally { result, error in
+                retainedResult2 = result
+                retainedError = error
+                if let result2 = result, let result1 = retainedResult1, let result3 = retainedResult3 {
+                    promise.currentValue = (result1, result2, result3)
+                } else if let errorHappens = error ?? retainedError {
+                    promise.drop(becauseOf: errorHappens)
+                }
+            }
+            task3.finally { result, error in
+                retainedResult3 = result
+                retainedError = error
+                if let result3 = result, let result1 = retainedResult1, let result2 = retainedResult2 {
+                    promise.currentValue = (result1, result2, result3)
+                } else if let errorHappens = error ?? retainedError {
+                    promise.drop(becauseOf: errorHappens)
+                }
             }
         }
-        task3.finally { result, error in
-            retainedResult3 = result
-            retainedError = error
-            if let result3 = result, let result1 = retainedResult1, let result2 = retainedResult2 {
-                promise.currentValue = (result1, result2, result3)
-            } else if let errorHappens = error ?? retainedError {
-                promise.drop(becauseOf: errorHappens)
-            }
-        }
+        return promise
     }
-    return promise
-}
