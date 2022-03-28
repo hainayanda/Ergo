@@ -94,7 +94,6 @@
 		B38816E0763C52BEFD013F148728892A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA8B94E9D3B433157168D1EECCEC11CD /* Foundation.framework */; };
 		B6F5C6520E5524A070D8A16B2162A854 /* Ergo-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 59222077B9395AE5FF694961722EB709 /* Ergo-dummy.m */; };
 		B844C53365327CB75CC1645AE73CDCED /* CwlMachBadInstructionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 4533A88B2DE8230A61D3FE3F4CD5BC98 /* CwlMachBadInstructionHandler.m */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
-		BB27BABA27F16C4C00EE0A01 /* VoidThenable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB27BAB927F16C4C00EE0A01 /* VoidThenable.swift */; };
 		BBDFE33827EC14EB0074654A /* NestedPromise.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDFE33727EC14EB0074654A /* NestedPromise.swift */; };
 		BBDFE33A27EC931B0074654A /* Task+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDFE33927EC931B0074654A /* Task+Extensions.swift */; };
 		C0D3EDC5F8D2546D5B5CB583230606B7 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E9D232917B7F9161AD32800BD7188F6 /* Errors.swift */; settings = {COMPILER_FLAGS = "-DPRODUCT_NAME=Nimble/Nimble"; }; };
@@ -268,7 +267,6 @@
 		B778739B132B4FEC875F9615ED37CAEA /* Nimble.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Nimble.h; path = Sources/Nimble/Nimble.h; sourceTree = "<group>"; };
 		B9973833824E7ED01540C73DCB2C1247 /* Quick-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Quick-dummy.m"; sourceTree = "<group>"; };
 		BAE263041362D074978BB3B577DF0A05 /* Nimble.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Nimble.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BB27BAB927F16C4C00EE0A01 /* VoidThenable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoidThenable.swift; sourceTree = "<group>"; };
 		BB2DD27CB90704924D6D50162205BD97 /* ExpectationMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpectationMessage.swift; path = Sources/Nimble/ExpectationMessage.swift; sourceTree = "<group>"; };
 		BBDFE33727EC14EB0074654A /* NestedPromise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NestedPromise.swift; path = Ergo/Classes/NestedPromise.swift; sourceTree = "<group>"; };
 		BBDFE33927EC931B0074654A /* Task+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Task+Extensions.swift"; path = "Ergo/Classes/Task+Extensions.swift"; sourceTree = "<group>"; };
@@ -595,7 +593,6 @@
 				EF8F16BBC05097426515E4A9C5690926 /* Support Files */,
 				BBDFE33727EC14EB0074654A /* NestedPromise.swift */,
 				BBDFE33927EC931B0074654A /* Task+Extensions.swift */,
-				BB27BAB927F16C4C00EE0A01 /* VoidThenable.swift */,
 			);
 			name = Ergo;
 			path = ../..;
@@ -832,7 +829,6 @@
 				64F98A87EC509D4DFD4626E5FA10A071 /* GlobalFunction.swift in Sources */,
 				BBDFE33827EC14EB0074654A /* NestedPromise.swift in Sources */,
 				41098A225A4A82517F92EF41F58F236B /* Promise.swift in Sources */,
-				BB27BABA27F16C4C00EE0A01 /* VoidThenable.swift in Sources */,
 				79902D355DAFB89884F6707A5C44BC48 /* Thenable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
