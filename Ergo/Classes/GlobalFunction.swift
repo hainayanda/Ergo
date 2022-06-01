@@ -6,24 +6,22 @@
 //
 
 import Foundation
+import Chary
 
+@available(*, deprecated, message: "use asyncIfNeeded from DispatchQueue method instead (from Chary library https://github.com/hainayanda/Chary)")
 /// Perform task in given dispatcher. If current queue is same as given dispatcher, it will run synchronously.
 /// - Parameters:
 ///   - dispatcher: DispatchQueue where task run
 ///   - work: Task to run
 public func syncIfPossible(on dispatcher: DispatchQueue, execute work: @escaping () -> Void) {
-    let currentQueue: DispatchQueue = .current ?? .main
-    guard currentQueue == dispatcher else {
-        dispatcher.async(execute: work)
-        return
-    }
-    work()
+    dispatcher.asyncIfNeeded(execute: work)
 }
 
+@available(*, deprecated, message: "use asyncIfNeeded from DispatchQueue.main method instead (from Chary library https://github.com/hainayanda/Chary)")
 /// Perform task in main DispatchQueue. If current queue is main, it will run synchronously.
 /// - Parameter work: Task to run
 public func syncOnMainIfPossible(execute work: @escaping () -> Void) {
-    syncIfPossible(on: .main, execute: work)
+    DispatchQueue.main.asyncIfNeeded(execute: work)
 }
 
 @discardableResult
