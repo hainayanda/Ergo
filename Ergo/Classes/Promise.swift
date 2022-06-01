@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Chary
 
 /// Regular Promise
 open class Promise<Result>: Thenable {
@@ -60,7 +61,7 @@ open class Promise<Result>: Thenable {
         let current: DispatchQueue = .current ?? .main
         let queueUsed = currentQueue ?? current
         self.promiseQueue = queueUsed
-        DispatchQueue.registerDetection(of: queueUsed)
+        queueUsed.registerDetection()
     }
     
     @discardableResult
@@ -74,7 +75,7 @@ open class Promise<Result>: Thenable {
         defer {
             registerChild(promise)
             registerWorker { input in
-                syncIfPossible(on: dispatcher) {
+                dispatcher.asyncIfNeeded {
                     do {
                         let result = try execute(input)
                         promise.currentValue = result
@@ -97,7 +98,7 @@ open class Promise<Result>: Thenable {
         defer {
             registerChild(promise)
             registerWorker { input in
-                syncIfPossible(on: dispatcher) {
+                dispatcher.asyncIfNeeded {
                     do {
                         let newPromise = try createNewPromise(input)
                         promise.nested = newPromise

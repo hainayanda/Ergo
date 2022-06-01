@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Chary
 #if canImport(UIKit)
 import UIKit
 
@@ -132,7 +133,7 @@ public final class ChainedAnimator {
     func runAnimation(completion: @escaping (Bool) -> Void) {
         let value = animationValue
         let animation = self.animation
-        syncOnMainIfPossible {
+        DispatchQueue.main.asyncIfNeeded {
             UIView.animate(
                 withDuration: value.duration,
                 delay: value.delay,

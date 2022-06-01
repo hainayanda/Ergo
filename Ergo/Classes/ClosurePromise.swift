@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Chary
 
 public typealias PromiseConsumer<Result> = (Result?, Error?) -> Void
 public typealias AsyncPromiseWorker<Result> = (@escaping PromiseConsumer<Result>) -> Void
@@ -22,7 +23,7 @@ open class ClosurePromise<Result>: Promise<Result> {
         super.init(currentQueue: currentQueue)
         // promise retained by design
         let promise = self
-        syncIfPossible(on: self.promiseQueue) {
+        self.promiseQueue.asyncIfNeeded {
             worker { result, error in
                 guard let result: Result = result else {
                     promise.drop(
