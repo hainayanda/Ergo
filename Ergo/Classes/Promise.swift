@@ -8,6 +8,8 @@
 import Foundation
 import Chary
 
+public typealias FinallyConsumer<Result> = (Result?, Error?) -> Void
+
 /// Regular Promise
 open class Promise<Result>: Thenable {
     
@@ -125,7 +127,7 @@ open class Promise<Result>: Thenable {
     ///   - dispatcher: Dispatcher where the task will executed
     /// - Parameter execute: Task to execute
     /// - Returns: New void promise
-    public func finally(on dispatcher: DispatchQueue, do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+    public func finally(on dispatcher: DispatchQueue, do execute: @escaping FinallyConsumer<Result>) -> VoidPromise {
         then(on: dispatcher) { result in
             execute(result, nil)
         }.handle { error in

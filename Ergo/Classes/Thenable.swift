@@ -68,7 +68,7 @@ public protocol Thenable: Dropable {
     ///   - dispatcher: Dispatcher where the task will executed
     /// - Parameter execute: Task to execute
     /// - Returns: New void promise
-    func finally(on dispatcher: DispatchQueue, do execute: @escaping PromiseConsumer<Result>) -> VoidPromise
+    func finally(on dispatcher: DispatchQueue, do execute: @escaping FinallyConsumer<Result>) -> VoidPromise
 }
 
 public extension Dropable {
@@ -132,7 +132,7 @@ public extension Thenable {
     /// Perform task after all previous task is finished
     /// - Parameter execute: Task to execute
     /// - Returns: New void promise
-    func finally(do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+    func finally(do execute: @escaping FinallyConsumer<Result>) -> VoidPromise {
         finally(on: promiseQueue, do: execute)
     }
     

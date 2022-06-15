@@ -30,12 +30,12 @@ public func syncOnMainIfPossible(execute work: @escaping () -> Void) {
 ///   - dispatcher: DispatchQueue where task run, the default is global background
 ///   - work: Task to run
 /// - Returns: Promise of Result
-public func runPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .background), run work: @escaping () throws -> Result) -> Promise<Result> {
-    asyncPromise(on: dispatcher) { done in
+public func runPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .background), timeout: TimeInterval = 10, run work: @escaping () throws -> Result) -> Promise<Result> {
+    asyncPromise(on: dispatcher, timeout: timeout) { consumer in
         do {
-            done(try work(), nil)
+            consumer.resolve(try work())
         } catch {
-            done(nil, error)
+            consumer.reject(error)
         }
     }
 }
@@ -44,8 +44,8 @@ public func runPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .back
 /// Perform Task as a promise in main dispatcher
 /// - Parameter work: Task to run
 /// - Returns: Promise of Result
-public func runPromiseOnMain<Result>(run work: @escaping () -> Result) -> Promise<Result> {
-    runPromise(on: .main, run: work)
+public func runPromiseOnMain<Result>(timeout: TimeInterval = 10, run work: @escaping () -> Result) -> Promise<Result> {
+    runPromise(on: .main, timeout: timeout, run: work)
 }
 
 /// Perform async task as a promise in given dispatcher
@@ -53,16 +53,16 @@ public func runPromiseOnMain<Result>(run work: @escaping () -> Result) -> Promis
 ///   - dispatcher: DispatchQueue where task run, the default is global background
 ///   - work: Promise task. Parameter is closure with Result and Error, call it once when the task is done, it will then trigger next Promise
 /// - Returns: Promise of Result
-public func asyncPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .background), run work: @escaping AsyncPromiseWorker<Result>) -> Promise<Result> {
-    let promise: ClosurePromise<Result> = .init(currentQueue: dispatcher, worker: work)
+public func asyncPromise<Result>(on dispatcher: DispatchQueue = .global(qos: .background), timeout: TimeInterval = 10, run work: @escaping AsyncPromiseWorker<Result>) -> Promise<Result> {
+    let promise: ClosurePromise<Result> = .init(currentQueue: dispatcher, timeout: timeout, worker: work)
     return promise
 }
 
 /// Perform async task as a promise in given dispatcher
 /// - Parameter work: Promise task. Parameter is closure with Result and Error, call it once when the task is done, it will then trigger next Promise
 /// - Returns: Promise of Result
-public func asyncPromiseOnMain<Result>(run work: @escaping AsyncPromiseWorker<Result>) -> Promise<Result> {
-    asyncPromise(on: .main, run: work)
+public func asyncPromiseOnMain<Result>(timeout: TimeInterval = 10, run work: @escaping AsyncPromiseWorker<Result>) -> Promise<Result> {
+    asyncPromise(on: .main, timeout: timeout, run: work)
 }
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
