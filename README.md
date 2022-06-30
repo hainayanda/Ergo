@@ -312,9 +312,13 @@ Keep in mind that all of async functionality just available on macOS 10.15, iOS 
 Sometimes the task you want to convert to Promise is already an asynchronous task. In this case, you can use `asyncPromise` instead of `runPromise`:
 
 ```swift
-asyncPromise(on: .main) { done in
+asyncPromise(on: .main) { consumer in
   doSomethingAsync { result, error in
-    done(result, error)
+    if let error = error {
+        consumer.reject(error)
+    } else if let result = result {
+        consumer.resolve(result)
+    }
   }
 }.then { result in
   print(result)

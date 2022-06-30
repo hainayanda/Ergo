@@ -8,8 +8,47 @@
 import Foundation
 import Chary
 
-public typealias PromiseConsumer<Result> = (Result?, Error?) -> Void
-public typealias AsyncPromiseWorker<Result> = (@escaping PromiseConsumer<Result>) -> Void
+public typealias AsyncPromiseWorker<Result> = (PromiseConsumer<Result>) -> Void
+
+public class PromiseConsumer<Result> {
+    typealias Resolver = (Result) -> Void
+    typealias Rejector = (Error?) -> Void
+    
+    let resolver: Resolver
+    let rejector: Rejector
+    @Atomic var valid: Bool = true
+    
+    init(_ resolving: @escaping Resolver, whenReject rejecting: @escaping Rejector) {
+        resolver = resolving
+        rejector = rejecting
+    }
+    
+    public func resolve(_ result: Result) {
+        runWhenValid {
+            resolver(result)
+        }
+    }
+    
+    public func reject(_ error: Error?) {
+        runWhenValid {
+            rejector(error)
+        }
+    }
+    
+    func runWhenValid(_ runner: () -> Void) {
+        guard valid else {
+            fatalError("Promise Consumer can only accept one result")
+        }
+        valid = false
+        runner()
+    }
+}
+
+extension PromiseConsumer where Result == Void {
+    public func resolve() {
+        resolve(())
+    }
+}
 
 /// Promise based on closure
 open class ClosurePromise<Result>: Promise<Result> {
@@ -19,23 +58,33 @@ open class ClosurePromise<Result>: Promise<Result> {
     /// - Parameters:
     ///   - currentQueue: DispatchQueue where worker run
     ///   - worker: Promise task. Parameter is closure with Result and Error, call it once when the task is done, it will then trigger next Promise
-    public init(currentQueue: DispatchQueue? = nil, worker: @escaping Worker) {
+    public init(currentQueue: DispatchQueue? = nil, timeout: TimeInterval = 10, worker: @escaping Worker) {
         super.init(currentQueue: currentQueue)
         // promise retained by design
-        let promise = self
+        @Atomic var promise: ClosurePromise<Result>? = self
         self.promiseQueue.asyncIfNeeded {
-            worker { result, error in
-                guard let result: Result = result else {
-                    promise.drop(
-                        becauseOf: error ?? ErgoError(
-                            errorDescription: "Ergo Error: Invalid result",
-                            failureReason: "result is nil"
-                        )
+            worker(.init { result in
+                promise?.currentValue = result
+                promise = nil
+            } whenReject: { error in
+                promise?.drop(
+                    becauseOf: error ?? ErgoError(
+                        errorDescription: "Ergo Error: Invalid result",
+                        failureReason: "result is nil"
                     )
-                    return
-                }
-                promise.currentValue = result
-            }
+                )
+                promise = nil
+            })
+        }
+        promiseQueue.asyncAfter(deadline: .now() + timeout) {
+            guard !(promise?.isCompleted ?? true) else { return }
+            promise?.drop(
+                becauseOf: ErgoError(
+                    errorDescription: "Ergo Error: Timeout",
+                    failureReason: "no result after \(timeout) second"
+                )
+            )
+            promise = nil
         }
     }
     
@@ -87,7 +136,7 @@ open class ClosurePromise<Result>: Promise<Result> {
     ///   - dispatcher: Dispatcher where the task will executed
     /// - Parameter execute: Task to execute
     /// - Returns: New void promise
-    open override func finally(on dispatcher: DispatchQueue, do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+    open override func finally(on dispatcher: DispatchQueue, do execute: @escaping FinallyConsumer<Result>) -> VoidPromise {
         super.finally(on: dispatcher, do: execute)
     }
     

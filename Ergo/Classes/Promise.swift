@@ -8,6 +8,8 @@
 import Foundation
 import Chary
 
+public typealias FinallyConsumer<Result> = (Result?, Error?) -> Void
+
 /// Regular Promise
 open class Promise<Result>: Thenable {
     
@@ -15,10 +17,10 @@ open class Promise<Result>: Thenable {
     /// Result of previous task
     open internal(set) var currentValue: Result? {
         get {
-            locked { _currentValue }
+            synced { _currentValue }
         }
         set {
-            locked { _currentValue = newValue }
+            synced { _currentValue = newValue }
             guard let value: Result = newValue else { return }
             notifyWorker(with: value)
         }
@@ -27,10 +29,10 @@ open class Promise<Result>: Thenable {
     /// error catched
     open internal(set) var error: Error? {
         get {
-            locked { _error }
+            synced { _error }
         }
         set {
-            locked { _error = newValue }
+            synced { _error = newValue }
             guard let value: Error = newValue else { return }
             notifyError(value)
         }
@@ -49,7 +51,6 @@ open class Promise<Result>: Thenable {
     
     /// DispatchQueue from previous task
     public let promiseQueue: DispatchQueue
-    var lock: NSLock = NSLock()
     private var abstractContinuations: [Any] = []
     private var workers: [(Result) -> Void] = []
     private var handlers: [(Error) -> Void] = []
@@ -126,7 +127,7 @@ open class Promise<Result>: Thenable {
     ///   - dispatcher: Dispatcher where the task will executed
     /// - Parameter execute: Task to execute
     /// - Returns: New void promise
-    public func finally(on dispatcher: DispatchQueue, do execute: @escaping PromiseConsumer<Result>) -> VoidPromise {
+    public func finally(on dispatcher: DispatchQueue, do execute: @escaping FinallyConsumer<Result>) -> VoidPromise {
         then(on: dispatcher) { result in
             execute(result, nil)
         }.handle { error in
@@ -169,7 +170,7 @@ open class Promise<Result>: Thenable {
             continuation.resume(throwing: error)
             return
         }
-        locked {
+        synced {
             abstractContinuations.append(continuation)
         }
     }
@@ -177,7 +178,7 @@ open class Promise<Result>: Thenable {
     @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
     func notifyContinuation(with result: Swift.Result<Result, Error>) {
         var dequeued: [CheckedContinuation<Result, Error>] = []
-        locked {
+        synced {
             dequeued = abstractContinuations.compactMap { $0 as? CheckedContinuation<Result, Error> }
             abstractContinuations = []
         }
@@ -186,7 +187,7 @@ open class Promise<Result>: Thenable {
     
     func registerWorker(_ worker: @escaping (Result) -> Void) {
         guard let result: Result = self.currentValue else {
-            locked {
+            synced {
                 workers.append(worker)
             }
             return
@@ -196,7 +197,7 @@ open class Promise<Result>: Thenable {
     
     func registerChild(_ promise: Dropable) {
         guard let error: Error = self.error else {
-            locked {
+            synced {
                 child.append(promise)
             }
             return
@@ -206,7 +207,7 @@ open class Promise<Result>: Thenable {
     
     func registerHandler(_ handler: @escaping (Error) -> Void) {
         guard let error: Error = self.error else {
-            locked {
+            synced {
                 handlers.append(handler)
             }
             return
@@ -244,7 +245,7 @@ open class Promise<Result>: Thenable {
     }
     
     func dequeueWorkers() -> [(Result) -> Void] {
-        locked {
+        synced {
             let workers = self.workers
             self.workers = []
             return workers
@@ -252,7 +253,7 @@ open class Promise<Result>: Thenable {
     }
     
     func dequeueChild() -> [Dropable] {
-        locked {
+        synced {
             let child = self.child
             self.child = []
             return child
@@ -260,18 +261,14 @@ open class Promise<Result>: Thenable {
     }
     
     func dequeueHandlers() -> [(Error) -> Void] {
-        locked {
+        synced {
             let handlers = self.handlers
             self.handlers = []
             return handlers
         }
     }
     
-    func locked<Result>(run: () -> Result) -> Result {
-        lock.lock()
-        defer {
-            lock.unlock()
-        }
-        return run()
+    func synced<Result>(run: () -> Result) -> Result {
+        promiseQueue.safeSync(execute: run)
     }
 }
