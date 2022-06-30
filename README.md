@@ -31,14 +31,14 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 Ergo is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'Ergo', '~> 1.3.1'
+pod 'Ergo', '~> 1.4.0'
 ```
 
 ### Swift Package Manager from XCode
 
 - Add it using XCode menu **File > Swift Package > Add Package Dependency**
 - Add **https://github.com/hainayanda/Ergo.git** as Swift Package URL
-- Set rules at **version**, with **Up to Next Major** option and put **1.3.1** as its version
+- Set rules at **version**, with **Up to Next Major** option and put **1.4.0** as its version
 - Click next and wait
 
 ### Swift Package Manager from Package.swift
@@ -47,7 +47,7 @@ Add as your target dependency in **Package.swift**
 
 ```swift
 dependencies: [
-  .package(url: "https://github.com/hainayanda/Ergo.git", .upToNextMajor(from: "1.3.1"))
+  .package(url: "https://github.com/hainayanda/Ergo.git", .upToNextMajor(from: "1.4.0"))
 ]
 ```
 
@@ -188,6 +188,20 @@ runPromise {
   print("this line will be executed after finally block finished")
 }.finally { result, error in
   print("this line always be executed after all promise is done")
+}
+```
+
+### Timeout
+
+You can add a timeout to your promise that will automatically throw error if the task is not finished after the given timeout:
+
+```swift
+runPromise(timeout: 1) {
+  doLongTask()
+}.then {
+  print("task is run for less than 1 second")
+}.handle {
+  print("task is run for more than 1 second")
 }
 ```
 
